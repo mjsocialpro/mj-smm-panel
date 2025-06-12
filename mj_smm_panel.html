@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MJ Social Boost Provider</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    header { background: #1a1a2e; color: #fff; padding: 20px; text-align: center; }
+    .container { max-width: 900px; margin: auto; padding: 20px; background: #fff; }
+    h2 { color: #1a1a2e; }
+    label { display: block; margin-top: 10px; }
+    input, select, button { padding: 10px; margin-top: 5px; width: 100%; box-sizing: border-box; }
+    .balance { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MJ Social Boost Provider</h1>
+  </header>
+
+  <div class="container">
+    <h2>Check Balance</h2>
+    <button onclick="getBalance()">Get Balance</button>
+    <div class="balance" id="balanceDisplay">Your balance: --</div>
+
+    <h2>Place Order</h2>
+    <form onsubmit="placeOrder(event)">
+      <label for="service">Select Service:</label>
+      <select id="service"></select>
+
+      <label for="link">Enter Link:</label>
+      <input type="text" id="link" required>
+
+      <label for="quantity">Quantity:</label>
+      <input type="number" id="quantity" required>
+
+      <button type="submit">Place Order</button>
+    </form>
+  </div>
+
+  <script>
+    const API_KEY = "YOUR_API_KEY"; // Replace with your API key
+    const API_URL = "https://your-smm-api.com"; // Replace with your SMM API URL
+
+    // Fetch services
+    async function loadServices() {
+      const res = await fetch(`${API_URL}?key=${API_KEY}&action=services`);
+      const services = await res.json();
+      const serviceSelect = document.getElementById("service");
+      services.forEach(service => {
+        const option = document.createElement("option");
+        option.value = service.service;
+        option.textContent = `${service.name} (${service.rate} per 1000)`;
+        serviceSelect.appendChild(option);
+      });
+    }
+
+    // Get balance
+    async function getBalance() {
+      const res = await fetch(`${API_URL}?key=${API_KEY}&action=balance`);
+      const data = await res.json();
+      document.getElementById("balanceDisplay").textContent = `Your balance: ${data.balance} ${data.currency}`;
+    }
+
+    // Place order
+    async function placeOrder(event) {
+      event.preventDefault();
+      const service = document.getElementById("service").value;
+      const link = document.getElementById("link").value;
+      const quantity = document.getElementById("quantity").value;
+
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: API_KEY,
+          action: "add",
+          service: service,
+          link: link,
+          quantity: quantity
+        })
+      });
+      const result = await res.json();
+      alert("Order ID: " + result.order);
+    }
+
+    window.onload = loadServices;
+  </script>
+</body>
+</html>
